@@ -1,6 +1,6 @@
 // store.repository.js
 import { db } from "./../db/firebase.js";
-import { collection, query, where, onSnapshot, getDocs, getDoc, doc, setDoc, addDoc, deleteDoc, updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, getDoc, doc, setDoc, addDoc, deleteDoc, updateDoc } from "firebase/firestore";
 
 export const findStore = async (storeId) => {
   const docRef = doc(db, "stores", storeId);
@@ -31,24 +31,24 @@ export const findProductsByStore = async (storeId) => {
   return products;
 };
 
-export const findProductsByStoreRealTime = async (storeId, onDataCallback, onErrorCallback) => {
-  const q = query(collection(db, "products"), where("storeId", "==", storeId));
-  const unsubscribe = onSnapshot(
-    q,
-    (querySnapshot) => {
-      const products = [];
-      querySnapshot.forEach((doc) => {
-        products.push({ ...doc.data(), id: doc.id });
-      });
-      onDataCallback(products);
-    },
-    (error) => {
-      onErrorCallback(error);
-    }
-  );
+// export const findProductsByStoreRealTime = async (storeId, onDataCallback, onErrorCallback) => {
+//   const q = query(collection(db, "products"), where("storeId", "==", storeId));
+//   const unsubscribe = onSnapshot(
+//     q,
+//     (querySnapshot) => {
+//       const products = [];
+//       querySnapshot.forEach((doc) => {
+//         products.push({ ...doc.data(), id: doc.id });
+//       });
+//       onDataCallback(products);
+//     },
+//     (error) => {
+//       onErrorCallback(error);
+//     }
+//   );
 
-  return unsubscribe;
-};
+//   return unsubscribe;
+// };
 
 export const insertStore = async (storeData) => {
   const {storeId, storeName, storeLocation, storeProfilePicture, ownerId} = storeData;

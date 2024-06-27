@@ -29,21 +29,16 @@ chatroomController.get("/participants/:mainUserId/:chatPartnerId", async (req, r
 // GET CHAT PARTNER DATA
 chatroomController.get("/:chatroomId/chatPartner", async (req, res) => {
   try {
-    const {mainUserId} = req.query;
+    const { mainUserId } = req.query;
     const chatroomId = req.params.chatroomId;
 
     const chatPartnerData = await getChatPartnerData(chatroomId, mainUserId);
-    
+
     res.status(200).json(chatPartnerData);
-
-
-
-
   } catch (error) {
     res.status(400).send(error.message);
   }
-}) 
-
+});
 
 // chatroomController.get("/users/:userId", async (req, res) => {
 //   try {

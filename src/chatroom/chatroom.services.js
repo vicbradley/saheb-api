@@ -3,8 +3,6 @@ import {
   findChatPartnerData,
   findChatroomById,
   findChatroomByParticipant,
-  findChatroomDataRealTime,
-  findChatroomMessagesRealTime,
   insertChatroom,
   insertChatroomMessage,
   updateChatroomExpiry,
@@ -30,52 +28,52 @@ export const getChatPartnerData = async (chatroomId, mainUserId) => {
   return chatPartnerId;
 };
 
-export const getChatroomMessagesRealTime = async (socket, chatroomId, mainUserId) => {
-  if (!chatroomId || !mainUserId) {
-    socket.emit("error", "Chat Room Id or Main User Id is missing");
-    return;
-  }
+// export const getChatroomMessagesRealTime = async (socket, chatroomId, mainUserId) => {
+//   if (!chatroomId || !mainUserId) {
+//     socket.emit("error", "Chat Room Id or Main User Id is missing");
+//     return;
+//   }
 
-  const unsubscribe = findChatroomMessagesRealTime(
-    chatroomId,
-    mainUserId,
-    (messages) => {
-      socket.emit("messages", messages);
-    },
-    (error) => {
-      socket.emit("error", error);
-    }
-  );
+//   const unsubscribe = findChatroomMessagesRealTime(
+//     chatroomId,
+//     mainUserId,
+//     (messages) => {
+//       socket.emit("messages", messages);
+//     },
+//     (error) => {
+//       socket.emit("error", error);
+//     }
+//   );
 
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-    () => unsubscribe();
-  });
-};
+//   socket.on("disconnect", () => {
+//     console.log("Client disconnected");
+//     () => unsubscribe();
+//   });
+// };
 
-export const getChatroomsDataRealTime = async (socket, uid) => {
-  if (!uid) return;
-  const userData = await findUserById(uid);
+// export const getChatroomsDataRealTime = async (socket, uid) => {
+//   if (!uid) return;
+//   const userData = await findUserById(uid);
 
-  const {username, profilePicture} = userData;
+//   const {username, profilePicture} = userData;
 
-  const unsubscribe = findChatroomDataRealTime(
-    uid,
-    username,
-    profilePicture,
-    (chatroomsData) => {
-      socket.emit("chatrooms data", chatroomsData);
-    },
-    (error) => {
-      socket.emit("error", error);
-    }
-  );
+//   const unsubscribe = findChatroomDataRealTime(
+//     uid,
+//     username,
+//     profilePicture,
+//     (chatroomsData) => {
+//       socket.emit("chatrooms data", chatroomsData);
+//     },
+//     (error) => {
+//       socket.emit("error", error);
+//     }
+//   );
 
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-    () => unsubscribe();
-  });
-};
+//   socket.on("disconnect", () => {
+//     console.log("Client disconnected");
+//     () => unsubscribe();
+//   });
+// };
 
 export const createChatroom = async (mainUserData, chatPartnerData) => {
   const newChatroom = await insertChatroom(mainUserData, chatPartnerData);

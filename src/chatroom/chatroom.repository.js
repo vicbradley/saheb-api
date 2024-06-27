@@ -72,8 +72,6 @@ export const findChatPartnerData = async (chatroomId, mainUserId) => {
 
   const chatPartnerId = chatRoomSnap.data().participants.filter((participant) => mainUserId !== participant.uid)[0].uid;
 
-  // const { uid, username, profilePicture } = chatPartnerData;
-
   const chatPartnerRef = doc(db, "users", chatPartnerId);
   const chatPartnerSnap = await getDoc(chatPartnerRef);
 
@@ -90,107 +88,107 @@ export const findChatPartnerData = async (chatroomId, mainUserId) => {
   return chatPartnerData;
 };
 
-export const findChatroomMessagesRealTime = async (chatroomId, mainUserId, onDataCallback, onErrorCallback) => {
-  const docRef = doc(db, "chatrooms", chatroomId);
+// export const findChatroomMessagesRealTime = async (chatroomId, mainUserId, onDataCallback, onErrorCallback) => {
+//   const docRef = doc(db, "chatrooms", chatroomId);
 
-  const unsubscribe = onSnapshot(
-    docRef,
-    async (document) => {
-      const { messages } = document.data();
+//   const unsubscribe = onSnapshot(
+//     docRef,
+//     async (document) => {
+//       const { messages } = document.data();
 
-      if (messages.length < 1) {
-        return;
-      }
+//       if (messages.length < 1) {
+//         return;
+//       }
       
 
-      // Membuat transaksi Firestore
-      try {
-        await runTransaction(db, async (transaction) => {
-          const docSnapshot = await transaction.get(docRef);
-          const docData = docSnapshot.data();
+//       // Membuat transaksi Firestore
+//       try {
+//         await runTransaction(db, async (transaction) => {
+//           const docSnapshot = await transaction.get(docRef);
+//           const docData = docSnapshot.data();
 
-          // Memperbarui status isRead pesan tertentu yang belum dibaca
-          const updatedMessages = docData.messages.map((message) => {
-            if (message.senderId !== mainUserId && !message.isRead) {
-              message.isRead = true;
-            }
-            return message;
-          });
+//           // Memperbarui status isRead pesan tertentu yang belum dibaca
+//           const updatedMessages = docData.messages.map((message) => {
+//             if (message.senderId !== mainUserId && !message.isRead) {
+//               message.isRead = true;
+//             }
+//             return message;
+//           });
 
-          // Memperbarui pesan di Firestore dalam transaksi
-          transaction.update(docRef, { messages: updatedMessages });
+//           // Memperbarui pesan di Firestore dalam transaksi
+//           transaction.update(docRef, { messages: updatedMessages });
 
-          // Mengirimkan data ke callback
-          onDataCallback(updatedMessages);
-        });
-      } catch (error) {
-        onErrorCallback(error);
-      }
-    },
-    (error) => {
-      onErrorCallback(error);
-    }
-  );
+//           // Mengirimkan data ke callback
+//           onDataCallback(updatedMessages);
+//         });
+//       } catch (error) {
+//         onErrorCallback(error);
+//       }
+//     },
+//     (error) => {
+//       onErrorCallback(error);
+//     }
+//   );
 
-  return unsubscribe;
-};
-
-
-export const findChatroomDataRealTime = async (uid, username, profilePicture, onDataCallback, onErrorCallback) => {
-  const q = query(collection(db, "chatrooms"), where("participants", "array-contains", { uid, profilePicture, username }));
-
-  const unsubscribe = onSnapshot(
-    q,
-    (querySnapshot) => {
-      let chatroomsData = [];
-      let unreadMessageCount = 0;
+//   return unsubscribe;
+// };
 
 
-      querySnapshot.forEach((doc) => {
-        const { participants, messages } = doc.data();
+// export const findChatroomDataRealTime = async (uid, username, profilePicture, onDataCallback, onErrorCallback) => {
+//   const q = query(collection(db, "chatrooms"), where("participants", "array-contains", { uid, profilePicture, username }));
 
-        const chatPartner = participants.filter((data) => data.uid !== uid);
-
-        if (messages.length < 1) {
-          chatroomsData.push({
-            id: doc.id,
-            username: chatPartner[0].username,
-            profilePicture: chatPartner[0].profilePicture,
-            unreadMsg: 0,
-            latestMsg: "",
-          });
-        } else {
-          const unreadMsg = messages.filter((msg) => {
-            return msg.senderId !== uid && msg.isRead === false;
-          }).length;
-
-          const latestMsg = messages[messages.length - 1].text;
-
-          unreadMessageCount += unreadMsg;
-
-          chatroomsData.push({
-            id: doc.id,
-            username: chatPartner[0].username,
-            profilePicture: chatPartner[0].profilePicture,
-            unreadMsg,
-            latestMsg,
-          });
-        }
-      });
+//   const unsubscribe = onSnapshot(
+//     q,
+//     (querySnapshot) => {
+//       let chatroomsData = [];
+//       let unreadMessageCount = 0;
 
 
-      onDataCallback({
-        chatroomsData,
-        unreadMessageCount,
-      });
-    },
-    (error) => {
-      onErrorCallback(error);
-    }
-  );
+//       querySnapshot.forEach((doc) => {
+//         const { participants, messages } = doc.data();
 
-  return unsubscribe;
-};
+//         const chatPartner = participants.filter((data) => data.uid !== uid);
+
+//         if (messages.length < 1) {
+//           chatroomsData.push({
+//             id: doc.id,
+//             username: chatPartner[0].username,
+//             profilePicture: chatPartner[0].profilePicture,
+//             unreadMsg: 0,
+//             latestMsg: "",
+//           });
+//         } else {
+//           const unreadMsg = messages.filter((msg) => {
+//             return msg.senderId !== uid && msg.isRead === false;
+//           }).length;
+
+//           const latestMsg = messages[messages.length - 1].text;
+
+//           unreadMessageCount += unreadMsg;
+
+//           chatroomsData.push({
+//             id: doc.id,
+//             username: chatPartner[0].username,
+//             profilePicture: chatPartner[0].profilePicture,
+//             unreadMsg,
+//             latestMsg,
+//           });
+//         }
+//       });
+
+
+//       onDataCallback({
+//         chatroomsData,
+//         unreadMessageCount,
+//       });
+//     },
+//     (error) => {
+//       onErrorCallback(error);
+//     }
+//   );
+
+//   return unsubscribe;
+// };
 
 export const insertChatroom = async (mainUserData, chatPartnerData) => {
   const docRef = await addDoc(collection(db, "chatrooms"), {

@@ -5,21 +5,19 @@ export const findUserById = async (userId) => {
   const docRef = doc(db, "users", userId);
   const docSnap = await getDoc(docRef);
 
-  if (!docSnap.data()) throw Error("User not found!");
+  const user = docSnap.data();
 
-  const product = docSnap.data();
-
-  return product;
+  return user;
 };
 
 export const updateUserById = async (userId, userNewData) => {
   const { username, profilePicture } = userNewData;
   const userDoc = doc(db, "users", userId);
 
-  const updatedUser = await updateDoc(userDoc, {
+  await updateDoc(userDoc, {
     username,
     profilePicture,
   });
 
-  return updatedUser;
+  return `User with id:${userId} successfully updated`;
 };
