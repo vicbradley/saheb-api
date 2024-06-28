@@ -31,24 +31,6 @@ export const findProductsByStore = async (storeId) => {
   return products;
 };
 
-// export const findProductsByStoreRealTime = async (storeId, onDataCallback, onErrorCallback) => {
-//   const q = query(collection(db, "products"), where("storeId", "==", storeId));
-//   const unsubscribe = onSnapshot(
-//     q,
-//     (querySnapshot) => {
-//       const products = [];
-//       querySnapshot.forEach((doc) => {
-//         products.push({ ...doc.data(), id: doc.id });
-//       });
-//       onDataCallback(products);
-//     },
-//     (error) => {
-//       onErrorCallback(error);
-//     }
-//   );
-
-//   return unsubscribe;
-// };
 
 export const insertStore = async (storeData) => {
   const {storeId, storeName, storeLocation, storeProfilePicture, ownerId} = storeData;

@@ -40,16 +40,6 @@ chatroomController.get("/:chatroomId/chatPartner", async (req, res) => {
   }
 });
 
-// chatroomController.get("/users/:userId", async (req, res) => {
-//   try {
-//     const userId = req.params.userId;
-//     const chatroomData = await getChatroomByUser(userId);
-
-//     res.status(200).json(chatroomData);
-//   } catch (error) {
-//     res.status(400).send(error.message);
-//   }
-// });
 
 chatroomController.post("/", async (req, res) => {
   try {
