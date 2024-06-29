@@ -1,4 +1,4 @@
-import { doc, updateDoc, query, collection, where, getDocs, addDoc, getDoc, arrayUnion, onSnapshot, runTransaction } from "firebase/firestore";
+import { doc, updateDoc, query, collection, where, getDocs, addDoc, getDoc, arrayUnion, onSnapshot, runTransaction, documentId } from "firebase/firestore";
 import { db } from "./../db/firebase.js";
 import moment from "moment";
 import { getUserById } from "../user/user.services.js";
@@ -132,18 +132,19 @@ export const updateChatroomExpiry = async (chatroomId) => {
   return true;
 };
 
+// repository.js
 export const updateChatroomsUserData = async (userData, userNewData) => {
   const { uid } = userData;
   const q = query(collection(db, "chatrooms"), where("participants", "array-contains", userData));
 
   const querySnapshot = await getDocs(q);
 
-  querySnapshot.forEach(async (document) => {
+  const updatePromises = querySnapshot.docs.map(async (document) => {
     const chatRoomRef = doc(db, "chatrooms", document.id);
 
     const participant = document.data().participants.filter((participant) => participant.uid !== uid);
 
-    const updatedChatrooms = await updateDoc(chatRoomRef, {
+    await updateDoc(chatRoomRef, {
       participants: [
         {
           uid,
@@ -157,7 +158,10 @@ export const updateChatroomsUserData = async (userData, userNewData) => {
         },
       ],
     });
-
-    return updatedChatrooms;
   });
+
+  await Promise.all(updatePromises);
+
+  return "Update complete"; // or some other relevant return value
 };
+

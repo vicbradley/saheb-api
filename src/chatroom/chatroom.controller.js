@@ -40,7 +40,7 @@ chatroomController.get("/:chatroomId/chatPartner", async (req, res) => {
   }
 });
 
-
+// CREATE CHATROOM
 chatroomController.post("/", async (req, res) => {
   try {
     const { mainUserData, chatPartnerData } = req.body;
@@ -52,6 +52,7 @@ chatroomController.post("/", async (req, res) => {
   }
 });
 
+// INSERT CHATROOM MESSAGE
 chatroomController.post("/:chatroomId/message", async (req, res) => {
   try {
     const message = req.body;
@@ -65,6 +66,7 @@ chatroomController.post("/:chatroomId/message", async (req, res) => {
   }
 });
 
+// UPDATE CHATROOM EXPIRY
 chatroomController.patch("/:chatroomId/expiry", async (req, res) => {
   try {
     const isSuccess = await editChatroomExpiry(req.params.chatroomId);
@@ -75,6 +77,7 @@ chatroomController.patch("/:chatroomId/expiry", async (req, res) => {
   }
 });
 
+// UPDATE CHATROOM USER DATA
 chatroomController.patch("/users/:userId", async (req, res) => {
   try {
     const { userData, userNewData } = req.body;
