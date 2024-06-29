@@ -38,8 +38,8 @@ export const editChatroomExpiry = async (chatroomId) => {
   return isSuccess;
 };
 
-export const editChatroomsUserData = async (userData, newUserData) => {
-  const updatedChatrooms = await updateChatroomsUserData(userData, newUserData);
+export const editChatroomsUserData = async (userData, userNewData) => {
+  const updatedChatrooms = await updateChatroomsUserData(userData, userNewData);
 
   return updatedChatrooms;
 };
