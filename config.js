@@ -3,7 +3,7 @@ import assert from "assert";
 
 dotenv.config();
 
-const { PORT, HOST, HOST_URL, API_KEY, AUTH_DOMAIN, PROJECT_ID, STORAGE_BUCKET, MESSAGING_SENDER_ID, APP_ID, MEASUREMENT_ID } = process.env;
+const { PORT, HOST, HOST_URL, API_KEY, AUTH_DOMAIN, PROJECT_ID, STORAGE_BUCKET, MESSAGING_SENDER_ID, APP_ID, MEASUREMENT_ID, JWT_SECRET } = process.env;
 
 assert(PORT, "Port is required");
 assert(HOST, "Host is required");
@@ -21,4 +21,6 @@ export default {
     appId: APP_ID,
     measurementId: MEASUREMENT_ID,
   },
+  jwtSecret: JWT_SECRET,
+  jwtExpiration: '5m',
 };
