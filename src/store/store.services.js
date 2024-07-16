@@ -1,4 +1,4 @@
-import { dropProductById, findProductsByStore, findStore, insertProduct, insertStore, updateProductById } from "./store.repository.js";
+import { dropProductById, findProductsByStore, findStore, findStoreProductsByKeyWords, insertProduct, insertStore, updateProductById } from "./store.repository.js";
 import { getProductById } from "./../product/product.services.js";
 
 export const getStoreById = async (storeId) => {
@@ -7,10 +7,17 @@ export const getStoreById = async (storeId) => {
   return storeData;
 };
 
-export const getProductsByStore = async (storeId) => {
-  const products = await findProductsByStore(storeId);
+export const getProductsByStore = async (storeId, page, limitValue) => {
+  const {products, totalItems} = await findProductsByStore(storeId, page, limitValue);
+  const totalPages = Math.ceil(totalItems / limitValue);
 
-  return products;
+  return { products, totalItems, totalPages };
+};
+
+export const getStoreProductsByKeyword = async (storeId, keyword) => {
+  const searchedProducts = await findStoreProductsByKeyWords(storeId, keyword);
+
+  return searchedProducts;
 };
 
 export const createStore = async (storeData) => {

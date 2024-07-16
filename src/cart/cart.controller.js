@@ -1,9 +1,12 @@
 import express from "express";
-import { addCartItem, orderItems, deleteCartItem, deleteOrderItems,getCartById, checkoutItems } from "./cart.services.js";
+import { addCartItem, orderItems, deleteCartItem, deleteOrderItems, getCartById, checkoutItems } from "./cart.services.js";
+import { verifyToken } from "../middleware/auth.js";
+import { checkUserValidity } from "../middleware/checkUserValidity.js";
+import { checkAdminValidity } from "../middleware/checkAdminValidity.js";
 
 const cartController = express.Router();
 
-cartController.get("/:userId", async (req, res) => {
+cartController.get("/:userId", verifyToken, checkUserValidity, async (req, res) => {
   try {
     const userId = req.params.userId;
     const cart = await getCartById(userId);
@@ -14,7 +17,7 @@ cartController.get("/:userId", async (req, res) => {
   }
 });
 
-cartController.post("/:userId", async (req, res) => {
+cartController.post("/:userId", verifyToken, checkUserValidity, async (req, res) => {
   try {
     const userId = req.params.userId;
     const productData = req.body;
@@ -27,12 +30,10 @@ cartController.post("/:userId", async (req, res) => {
   }
 });
 
-cartController.delete("/:userId", async (req, res) => {
+cartController.delete("/:userId", verifyToken, checkUserValidity, async (req, res) => {
   try {
     const userId = req.params.userId;
-    // const productData = req.body;
-    const productId = req.query.productId
-    // console.log({userId, productId})
+    const productId = req.query.productId;
 
     await deleteCartItem(userId, productId);
 
@@ -42,12 +43,13 @@ cartController.delete("/:userId", async (req, res) => {
   }
 });
 
-cartController.patch("/:userId/order", async (req, res) => {
+cartController.patch("/:userId/order", verifyToken, checkUserValidity, async (req, res) => {
   try {
     const userId = req.params.userId;
-    const products = req.body;
+    const orderData = req.body;
 
-    await orderItems(userId, products);
+
+    await orderItems(userId, orderData);
 
     res.status(200).send("Cart Items Is Being Paid");
   } catch (error) {
@@ -55,11 +57,12 @@ cartController.patch("/:userId/order", async (req, res) => {
   }
 });
 
-cartController.patch("/:userId/cancel-order", async (req, res) => {
+cartController.patch("/:userId/cancel-order", verifyToken, checkUserValidity, async (req, res) => {
   try {
     const userId = req.params.userId;
+    const transactionId = req.body.transactionId;
 
-    await deleteOrderItems(userId);
+    await deleteOrderItems(userId, transactionId);
 
     res.status(200).send("Cancel order");
   } catch (error) {
@@ -67,11 +70,12 @@ cartController.patch("/:userId/cancel-order", async (req, res) => {
   }
 });
 
-cartController.patch("/:userId/checkout", async (req, res) => {
+cartController.patch("/:userId/checkout", checkAdminValidity, async (req, res) => {
   try {
     const userId = req.params.userId;
+    const transactionId = req.body.transactionId;
 
-    await checkoutItems(userId);
+    await checkoutItems(userId, transactionId);
 
     res.status(200).send("Checkout Success");
   } catch (error) {

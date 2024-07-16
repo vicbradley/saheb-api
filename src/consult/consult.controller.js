@@ -1,5 +1,6 @@
 import express from "express";
 import { getAllConsultant, getToken } from "./consult.services.js";
+import { verifyToken } from "../middleware/auth.js";
 
 const consultController = express.Router();
 
@@ -12,7 +13,7 @@ consultController.get("/consultants", async (req, res) => {
   }
 });
 
-consultController.get("/tokens/:tokenValue", async (req, res) => {
+consultController.get("/token/:tokenValue", verifyToken, async (req, res) => {
   try {
     const token = await getToken(req.params.tokenValue);
 

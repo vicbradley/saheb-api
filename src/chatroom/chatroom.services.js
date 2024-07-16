@@ -1,10 +1,4 @@
-import { findChatPartnerData, findChatroomById, findChatroomByParticipant, insertChatroom, insertChatroomMessage, updateChatroomExpiry, updateChatroomsUserData } from "./chatroom.repository.js";
-
-export const getChatroomById = async (chatroomId) => {
-  const chatroomData = await findChatroomById(chatroomId);
-
-  return chatroomData;
-};
+import { findChatPartnerData, findChatroomByParticipant, insertChatroom, insertChatroomMessage, updateChatroomExpiry } from "./chatroom.repository.js";
 
 export const getChatroomByParticipants = async (mainUserId, chatPartnerId) => {
   const chatRoom = await findChatroomByParticipant(mainUserId, chatPartnerId);
@@ -36,10 +30,4 @@ export const editChatroomExpiry = async (chatroomId) => {
   const isSuccess = await updateChatroomExpiry(chatroomId);
 
   return isSuccess;
-};
-
-export const editChatroomsUserData = async (userData, userNewData) => {
-  const updatedChatrooms = await updateChatroomsUserData(userData, userNewData);
-
-  return updatedChatrooms;
 };

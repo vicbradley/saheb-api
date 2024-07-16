@@ -20,20 +20,19 @@ export const deleteCartItem = async (userId, productId) => {
   await dropCartItem(userId, productId);
 }
 
-export const orderItems = async (userId, products) => {
+export const orderItems = async (userId, orderData) => {
   await findUserById(userId);
 
-  await insertOrderItems(userId, products);
+  await insertOrderItems(userId, orderData);
 }
 
-export const deleteOrderItems = async (userId) => {
+export const deleteOrderItems = async (userId, transactionId) => {
   await findUserById(userId);
 
-  await dropOrderItems(userId);
+  await dropOrderItems(userId, transactionId);
 }
 
-export const checkoutItems = async (userId) => {
-  await findUserById(userId);
+export const checkoutItems = async (userId, transactionId) => {
 
-  await insertCheckoutItems(userId);
+  await insertCheckoutItems(userId, transactionId);
 }

@@ -1,30 +1,10 @@
-import { doc, updateDoc, query, collection, where, getDocs, addDoc, getDoc, arrayUnion, onSnapshot, runTransaction, documentId } from "firebase/firestore";
+import { doc, updateDoc, query, collection, where, getDocs, addDoc, getDoc, arrayUnion } from "firebase/firestore";
 import { db } from "./../db/firebase.js";
 import moment from "moment";
 import { getUserById } from "../user/user.services.js";
 moment().format();
 
-export const findChatroomById = async (chatroomId) => {
-  const chatroomRef = doc(db, "chatrooms", chatroomId);
-  const chatroomSnap = await getDoc(chatroomRef);
-
-  if (!chatroomSnap.data()) throw Error("Chatroom tidak ditemukan");
-
-  const chatroomData = {
-    id: chatroomId,
-    ...chatroomSnap.data(),
-  };
-
-  return chatroomData;
-};
-
 export const findChatroomByParticipant = async (mainUserId, chatPartnerId) => {
-  const chatRoomCollection = await getDocs(collection(db, "chatrooms"));
-
-  if (chatRoomCollection.empty) {
-    throw Error("Chatroom not found");
-  }
-
   const mainUserFullData = await getUserById(mainUserId);
 
   const mainUserData = {
@@ -125,43 +105,8 @@ export const updateChatroomExpiry = async (chatroomId) => {
   if (!chatroomSnap.data()) throw Error("Chatroom tidak ditemukan");
 
   await updateDoc(doc(db, "chatrooms", chatroomId), {
-    // chatExpired: moment().add(30, "minutes")._d.toString(),
-    chatExpired: moment().add(15, "minutes")._d.toString(),
+    chatExpired: moment().add(1, "days")._d.toString(),
   });
 
   return true;
 };
-
-// repository.js
-export const updateChatroomsUserData = async (userData, userNewData) => {
-  const { uid } = userData;
-  const q = query(collection(db, "chatrooms"), where("participants", "array-contains", userData));
-
-  const querySnapshot = await getDocs(q);
-
-  const updatePromises = querySnapshot.docs.map(async (document) => {
-    const chatRoomRef = doc(db, "chatrooms", document.id);
-
-    const participant = document.data().participants.filter((participant) => participant.uid !== uid);
-
-    await updateDoc(chatRoomRef, {
-      participants: [
-        {
-          uid,
-          username: userNewData.username,
-          profilePicture: userNewData.profilePicture,
-        },
-        {
-          uid: participant[0].uid,
-          username: participant[0].username,
-          profilePicture: participant[0].profilePicture,
-        },
-      ],
-    });
-  });
-
-  await Promise.all(updatePromises);
-
-  return "Update complete"; // or some other relevant return value
-};
-

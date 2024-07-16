@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, getDoc, limit, query, orderBy, startAfter, where } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, limit, query, startAfter  } from "firebase/firestore";
 import { db } from "./../db/firebase.js";
 import MiniSearch from 'minisearch';
 

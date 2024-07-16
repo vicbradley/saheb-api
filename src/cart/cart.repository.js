@@ -1,6 +1,7 @@
-import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, setDoc, writeBatch } from "firebase/firestore";
 import { db } from "./../db/firebase.js";
-import { getProductById } from "../product/product.services.js";
+import { findUserById } from "../user/user.repository.js";
+import moment from "moment";
 
 export const findCartById = async (userId) => {
   const docRef = doc(db, "carts", userId);
@@ -20,91 +21,162 @@ export const insertCartItem = async (userId, productData) => {
   const { id, name, price, stock, image, storeId, storeName } = productData;
 
   const cartRef = doc(db, "carts", userId);
+  const cartSnapshot = await getDoc(cartRef);
 
-  await updateDoc(cartRef, {
-    products: arrayUnion({ id, name, price, stock, image, storeId, storeName, amount: 1 }),
-  });
+  const cartData = cartSnapshot.data();
 
-  return productData;
+  const storeIndex = cartData.stores.findIndex((store) => store.storeId === storeId);
+
+  if (storeIndex !== -1) {
+    // Jika store sudah ada, tambahkan produk ke store tersebut
+    const store = cartData.stores[storeIndex];
+    const productIndex = store.products.findIndex((product) => product.id === id);
+
+    if (productIndex !== -1) {
+      // Jika produk sudah ada, update jumlah atau detail produk
+      store.products[productIndex] = { id, name, price: parseInt(price), stock, image };
+    } else {
+      // Jika produk belum ada, tambahkan produk baru
+      store.products.push({ id, name, price: parseInt(price), stock, image });
+    }
+
+    cartData.stores[storeIndex] = store;
+    await setDoc(cartRef, cartData);
+  } else {
+    // Jika store belum ada, tambahkan store baru dengan produk ini
+    const newStore = {
+      storeId,
+      storeName,
+      products: [{ id, name, price: parseInt(price), stock, image }],
+    };
+
+    await updateDoc(cartRef, {
+      stores: arrayUnion(newStore),
+    });
+  }
 };
 
 export const dropCartItem = async (userId, productId) => {
   const cartRef = doc(db, "carts", userId);
 
-  const product = await getProductById(productId);
+  const cartDoc = await getDoc(cartRef);
 
-  const { id, image, name, price, stock, storeId, storeName } = product;
+  if (cartDoc.exists()) {
+    const cartData = cartDoc.data();
+    const updatedStores = cartData.stores
+      .map((store) => {
+        const updatedProducts = store.products.filter((product) => product.id !== productId);
+        return updatedProducts.length > 0 ? { ...store, products: updatedProducts } : null;
+      })
+      .filter((store) => store !== null);
 
-  const obj = { amount: 1, id, image, name, price, stock, storeId, storeName };
-
-  await updateDoc(cartRef, {
-    products: arrayRemove(obj),
-  });
-};
-
-export const insertOrderItems = async (userId, products) => {
-  const cartRef = doc(db, "carts", userId);
-  const cartSnap = await getDoc(cartRef);
-
-  const { productsBeingPaid } = cartSnap.data();
-
-  await updateDoc(cartRef, {
-    products: [],
-    productsBeingPaid: [...productsBeingPaid, ...products],
-  });
-};
-
-export const dropOrderItems = async (userId) => {
-  const cartRef = doc(db, "carts", userId);
-  const cartSnap = await getDoc(cartRef);
-
-  const { products, productsBeingPaid } = cartSnap.data();
-
-  productsBeingPaid.map((product) => {
-    product.amount = 1;
-  });
-
-  const mergedArray = products.concat(productsBeingPaid.filter((paidProduct) => !products.some((product) => product.id !== paidProduct.id)));
-
-  await updateDoc(cartRef, {
-    products: mergedArray,
-    productsBeingPaid: [],
-  });
-};
-
-export const insertCheckoutItems = async (userId) => {
-  const cartRef = doc(db, "carts", userId);
-  const cartSnap = await getDoc(cartRef);
-
-  const { productsBeingPaid = [], paidProducts = [] } = cartSnap.data();
-
-  // Menggabungkan array tanpa duplikasi
-  const mergedArray = [...paidProducts];
-
-  productsBeingPaid.forEach((orderItem) => {
-    const existingProductIndex = mergedArray.findIndex((paidProduct) => paidProduct.id === orderItem.id);
-    if (existingProductIndex === -1) {
-      // Jika produk belum ada, tambahkan ke mergedArray
-      mergedArray.push(orderItem);
+    if (updatedStores.length > 0) {
+      await updateDoc(cartRef, { stores: updatedStores });
     } else {
-      // Jika produk sudah ada, tambahkan jumlahnya
-      mergedArray[existingProductIndex].amount += orderItem.amount;
+      await updateDoc(cartRef, { stores: [] });
     }
-  });
+  }
+};
 
+export const insertOrderItems = async (userId, orderData) => {
+  const cartRef = doc(db, "carts", userId);
+  const cartSnap = await getDoc(cartRef);
+
+  const cartData = cartSnap.data();
+  const { paymentProcess, stores } = cartData;
+
+  // Menambahkan orderData ke paymentProcess
+  const newPaymentProcess = [...paymentProcess, orderData];
+
+  // Menghapus produk dari stores berdasarkan storeId
+  const newStores = stores.reduce((acc, store) => {
+    if (store.storeId === orderData.storeId) {
+      const updatedProducts = store.products.filter((product) => {
+        return !orderData.products.some((orderProduct) => orderProduct.id === product.id);
+      });
+
+      // Hanya tambahkan store ke acc jika masih ada produk yang tersisa
+      if (updatedProducts.length > 0) {
+        acc.push({ ...store, products: updatedProducts });
+      }
+    } else {
+      acc.push(store);
+    }
+    return acc;
+  }, []);
+
+  // Memperbarui dokumen carts
   await updateDoc(cartRef, {
-    productsBeingPaid: [],
-    paidProducts: mergedArray,
+    paymentProcess: newPaymentProcess,
+    stores: newStores,
   });
+};
 
-  const updateStockPromises = productsBeingPaid.map(async (product) => {
+export const dropOrderItems = async (userId, transactionId) => {
+  const cartRef = doc(db, "carts", userId);
+  const cartSnap = await getDoc(cartRef);
+
+  const cartData = cartSnap.data();
+
+  // Find index of the transaction with given transactionId
+  const index = cartData.paymentProcess.findIndex((item) => item.transactionId === transactionId);
+
+  if (index !== -1) {
+    // Remove the transaction from paymentProcess array
+    cartData.paymentProcess.splice(index, 1);
+
+    // Update the document in Firestore
+    await updateDoc(cartRef, {
+      paymentProcess: cartData.paymentProcess,
+    });
+  } else {
+    throw Error(`Transaction with ID ${transactionId} not found in cart.`);
+  }
+};
+
+export const insertCheckoutItems = async (userId, transactionId) => {
+  const cartRef = doc(db, "carts", userId);
+  const cartSnap = await getDoc(cartRef);
+
+  if (!cartSnap.exists()) throw Error("No cart found for user.");
+
+  const cartData = cartSnap.data();
+  const paymentProcess = cartData.paymentProcess;
+  let transactionData = paymentProcess.find((item) => item.transactionId === transactionId);
+
+  if (!transactionData) throw Error("Invalid Transaction Id");
+
+  const userData = await findUserById(userId);
+  const { address, phoneNumber } = userData;
+  const transactionDate = moment().format("MMMM Do YYYY, h:mm:ss a");
+
+  transactionData = {
+    ...transactionData,
+    address,
+    phoneNumber,
+    transactionDate,
+    userId,
+    status: "Dikirim"
+  };
+
+  const transactionRef = doc(db, "transactions", transactionId);
+  await setDoc(transactionRef, transactionData);
+
+  const batch = writeBatch(db);
+
+  transactionData.products.forEach((product) => {
     const productRef = doc(db, "products", product.id);
-    const productSnap = await getDoc(productRef);
-
-    await updateDoc(productRef, {
-      stock: parseInt(productSnap.data().stock) - product.amount,
+    batch.update(productRef, {
+      stock: product.stock - product.quantity,
     });
   });
 
-  await Promise.all(updateStockPromises);
+  await batch.commit();
+
+  const updatedPaymentProcess = paymentProcess.filter((item) => item.transactionId !== transactionId);
+  await updateDoc(cartRef, {
+    paymentProcess: updatedPaymentProcess,
+  });
+
+  console.log("Transaction moved and stock updated successfully.");
 };

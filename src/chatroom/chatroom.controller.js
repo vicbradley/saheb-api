@@ -1,33 +1,12 @@
 import express from "express";
-import { createChatroom, createChatroomMessage, editChatroomExpiry, editChatroomsUserData, getChatPartnerData, getChatroomById, getChatroomByParticipants } from "./chatroom.services.js";
+import { createChatroom, createChatroomMessage, editChatroomExpiry, getChatPartnerData, getChatroomByParticipants } from "./chatroom.services.js";
+import { verifyToken } from "../middleware/auth.js";
+import { checkIsUserInChatroom } from "../middleware/checkIsUserInChatroom.js";
 
 const chatroomController = express.Router();
 
-// GET CHATROOM DATA BY CHATROOM ID
-chatroomController.get("/:chatroomId", async (req, res) => {
-  try {
-    const chatroomData = await getChatroomById(req.params.chatroomId);
-
-    res.status(200).json(chatroomData);
-  } catch (error) {
-    res.status(400).send(error.message);
-  }
-});
-
-// GET CHATROOM DATA BY PARTICIPANTS
-chatroomController.get("/participants/:mainUserId/:chatPartnerId", async (req, res) => {
-  try {
-    const { mainUserId, chatPartnerId } = req.params;
-    const chatroom = await getChatroomByParticipants(mainUserId, chatPartnerId);
-
-    res.status(200).json(chatroom);
-  } catch (error) {
-    res.status(400).send(error.message);
-  }
-});
-
 // GET CHAT PARTNER DATA
-chatroomController.get("/:chatroomId/chatPartner", async (req, res) => {
+chatroomController.get("/:chatroomId/chatPartner", verifyToken, checkIsUserInChatroom, async (req, res) => {
   try {
     const { mainUserId } = req.query;
     const chatroomId = req.params.chatroomId;
@@ -40,10 +19,28 @@ chatroomController.get("/:chatroomId/chatPartner", async (req, res) => {
   }
 });
 
+// GET CHATROOM DATA BY PARTICIPANTS
+chatroomController.get("/participants", verifyToken, checkIsUserInChatroom, async (req, res) => {
+  try {
+    const { mainUserId, chatPartnerId } = req.query;
+
+    const chatroom = await getChatroomByParticipants(mainUserId, chatPartnerId);
+
+    res.status(200).json(chatroom);
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
+});
+
 // CREATE CHATROOM
-chatroomController.post("/", async (req, res) => {
+chatroomController.post("/", verifyToken, async (req, res) => {
   try {
     const { mainUserData, chatPartnerData } = req.body;
+
+    if (mainUserData.uid !== req.userId) {
+      return res.status(401).send({ message: "Invalid User!" });
+    }
+
     const newChatroom = await createChatroom(mainUserData, chatPartnerData);
 
     res.status(200).json(newChatroom);
@@ -53,10 +50,14 @@ chatroomController.post("/", async (req, res) => {
 });
 
 // INSERT CHATROOM MESSAGE
-chatroomController.post("/:chatroomId/message", async (req, res) => {
+chatroomController.post("/:chatroomId/message", verifyToken, async (req, res) => {
   try {
     const message = req.body;
     const chatroomId = req.params.chatroomId;
+
+    if (message.senderId !== req.userId) {
+      return res.status(401).send({ message: "Invalid User!" });
+    }
 
     const isSuccess = await createChatroomMessage(chatroomId, message);
 
@@ -67,23 +68,11 @@ chatroomController.post("/:chatroomId/message", async (req, res) => {
 });
 
 // UPDATE CHATROOM EXPIRY
-chatroomController.patch("/:chatroomId/expiry", async (req, res) => {
+chatroomController.patch("/:chatroomId/expiry", verifyToken, async (req, res) => {
   try {
     const isSuccess = await editChatroomExpiry(req.params.chatroomId);
 
     res.status(200).json(isSuccess);
-  } catch (error) {
-    res.status(400).send(error.message);
-  }
-});
-
-// UPDATE CHATROOM USER DATA
-chatroomController.patch("/users/:userId", async (req, res) => {
-  try {
-    const { userData, userNewData } = req.body;
-    const updatedChatrooms = await editChatroomsUserData(userData, userNewData);
-
-    res.status(200).json(updatedChatrooms);
   } catch (error) {
     res.status(400).send(error.message);
   }
