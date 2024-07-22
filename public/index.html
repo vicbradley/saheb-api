@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- 
+    - primary meta tag
+  -->
+    <title>Saheb API</title>
+    <meta name="title" content="Saheb API" />
+    <meta name="description" content="Saheb API" />
+
+
+    <!-- 
+    - custom css link
+  -->
+    <link rel="stylesheet" href="./style.css" />
+
+    <!-- 
+    - google font link
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bangers&family=Carter+One&family=Noto+Sans+JP:wght@100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+
+    <!-- 
+    - preload images
+  -->
+    <link rel="preload" as="image" href="./images/hero-banner.jpg" />
+  </head>
+
+  <body id="top">
+    <!-- 
+    - #HEADER
+  -->
+
+    <header class="header" data-header>
+      <div class="container">
+        <button class="nav-toggle-btn" aria-label="toggle manu" data-nav-toggler>
+          <ion-icon name="menu-outline" aria-hidden="true" class="menu-icon"></ion-icon>
+          <ion-icon name="close-outline" aria-label="true" class="close-icon"></ion-icon>
+        </button>
+
+        <a href="#" class="logo">Saheb API</a>
+
+        <nav class="navbar" data-navbar>
+          <ul class="navbar-list">
+            <li class="navbar-item">
+              <a href="#home" class="navbar-link" data-nav-link>Home</a>
+            </li>
+
+            <li class="navbar-item">
+              <a href="#documentation" class="navbar-link" data-nav-link>Docs</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <article>
+        <!-- 
+        - #HERO
+      -->
+
+        <section id="home" class="section hero has-bg-image" id="home" aria-label="home" style="background-image: url('./images/hero-banner.jpg')">
+          <div class="container">
+            <h1 class="h1 hero-title"><span class="span"></span> Saheb API</h1>
+
+            <p class="hero-text">REST API Website Saheb</p>
+
+            <a href="https://saheb-mu.vercel.app/" class="btn">Visit Saheb</a>
+          </div>
+        </section>
+
+        <!-- 
+        - #SERVICE
+      -->
+
+        <section class="section service" aria-label="service">
+          <div class="container">
+            <img src="./images/service-image.png" width="122" height="136" loading="lazy" alt="" class="img" />
+
+            <h2 class="h2 section-title section-desc"><span class="span section-desc">Saheb API</span> adalah sebuah REST API yang dapat Anda gunakan untuk mengumpulkan data produk dan toko dari website Saheb</h2>
+          </div>
+        </section>
+
+        <section class="section docs" id="documentation" aria-label="documentation">
+          <div class="container">
+            <h2 class="h2 section-title docs-title">Dokumentasi</h2>
+            <h3 class="docs-subs">Data Produk</h3>
+
+            <div class="docs-subs-container">
+              <h4 class="docs-subs-route">Get: Semua Produk</h4>
+
+              <div class="docs-code">
+                fetch('https://saheb-api.vercel.app/products')
+                <p>./then(res=>res.json())</p>
+                <p>.then(json=>console.log(json))</p>
+              </div>
+
+              <button id="btn-products" class="btn-code" role="button">Hasil</button>
+
+              <div id="json-products" class="docs-code docs-code-fetch" style="display: none"></div>
+            </div>
+
+            <div class="docs-subs-container">
+              <h4 class="docs-subs-route">Get: Produk Berdasarkan Id</h4>
+
+              <div class="docs-code">
+                fetch('https://saheb-api.vercel.app/products/4eVkzBbSMRoK36piFYa7')
+                <p>./then(res=>res.json())</p>
+                <p>.then(json=>console.log(json))</p>
+              </div>
+
+              <button id="btn-product-by-id" class="btn-code" role="button">Hasil</button>
+
+              <div id="json-product-by-id" class="docs-code-fetch" style="display: none"></div>
+            </div>
+
+            <div class="docs-subs-container">
+              <h4 class="docs-subs-route">Get: Produk Berdasarkan Keyword Search</h4>
+
+              <div class="docs-code">
+                fetch('https://saheb-api.vercel.app/products/search/harness')
+                <p>./then(res=>res.json())</p>
+                <p>.then(json=>console.log(json))</p>
+              </div>
+
+              <button id="btn-product-by-search" class="btn-code" role="button">Hasil</button>
+
+              <div id="json-product-by-search" class="docs-code-fetch" style="display: none"></div>
+            </div>
+
+            <h3 class="docs-subs">Data Toko</h3>
+            <div class="docs-subs-container">
+              <h4 class="docs-subs-route">Get: Toko Berdasarkan Id</h4>
+
+              <div class="docs-code">
+                fetch('https://saheb-api.vercel.app/stores/saheb')
+                <p>./then(res=>res.json())</p>
+                <p>.then(json=>console.log(json))</p>
+              </div>
+
+              <button id="btn-store" class="btn-code" role="button">Hasil</button>
+
+              <div id="json-store" class="docs-code-fetch" style="display: none"></div>
+            </div>
+
+            <div class="docs-subs-container">
+              <h4 class="docs-subs-route">Get: Produk Berdasarkan Toko</h4>
+
+              <div class="docs-code">
+                fetch('https://saheb-api.vercel.app/stores/saheb/products')
+                <p>./then(res=>res.json())</p>
+                <p>.then(json=>console.log(json))</p>
+              </div>
+
+              <button id="btn-store-products" class="btn-code" role="button">Hasil</button>
+
+              <div id="json-store-products" class="docs-code-fetch" style="display: none"></div>
+            </div>
+
+            <div class="docs-subs-container">
+              <h4 class="docs-subs-route">Get: Produk Toko Berdasarkan Keyword Search</h4>
+
+              <div class="docs-code">
+                fetch('https://saheb-api.vercel.app/stores/saheb/products/search/pedigree')
+                <p>./then(res=>res.json())</p>
+                <p>.then(json=>console.log(json))</p>
+              </div>
+
+              <button id="btn-store-products-search" class="btn-code" role="button">Hasil</button>
+
+              <div id="json-store-products-search" class="docs-code-fetch" style="display: none"></div>
+            </div>
+          </div>
+        </section>
+      </article>
+    </main>
+
+    <!-- 
+    - #FOOTER
+  -->
+
+    <footer class="footer" style="background-image: url('./images/footer-bg.jpg')">
+      <div class="footer-top section">
+        <div class="container">
+          <div class="footer-brand">
+            <a href="#" class="logo">Saheb API</a>
+
+            <p class="footer-text">If you have any question, please contact us at <a href="mailto:saheb.restapi@gmail.com" class="link">saheb.restapi@gmail.com</a></p>
+
+            <ul class="contact-list">
+              <li class="contact-item">
+                <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+
+                <address class="address">Makassar, Sulawesi Selatan</address>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="container">
+          <p class="copyright">&copy; 2024 Made with ♥ by <a href="#" class="copyright-link">codewithsadee.</a></p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- 
+    - #BACK TO TOP
+  -->
+
+    <a href="#top" class="back-top-btn" aria-label="back to top" data-back-top-btn>
+      <ion-icon name="chevron-up" aria-hidden="true"></ion-icon>
+    </a>
+
+    <!-- 
+    - custom js link
+  -->
+    <script src="./script.js" defer></script>
+
+    <!-- 
+    - ionicon link
+  -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+  </body>
+</html>
