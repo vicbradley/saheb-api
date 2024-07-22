@@ -1,4 +1,4 @@
-import { getDocs, collection, where, query } from "firebase/firestore";
+import { getDocs, collection, where, query, getDoc, updateDoc, doc } from "firebase/firestore";
 import { db } from "./../db/firebase.js";
 
 export const findAllTransaction = async () => {
@@ -21,9 +21,34 @@ export const findTransactionByUserId = async (userId) => {
   }));
 
   return transactions;
+};
 
-  // if (querySnapshot.empty) {
-  //   throw Error("No")
-  //   return res.status(401).json({ message: "Invalid username or password" });
-  // }
+export const findTransactionById = async (transactionId) => {
+  const docRef = doc(db, "transactions", transactionId);
+  const docSnap = await getDoc(docRef);
+
+
+  if (!docSnap.exists()) throw Error("Invalid transaction id!");
+
+  const transaction = docSnap.data();
+
+  return transaction;
+};
+
+export const updateTransactionById = async (transactionData) => {
+  const { recipientName, transactionId, shipmentProof } = transactionData;
+
+  const docRef = doc(db, "transactions", transactionId);
+
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.data()) throw Error("Invalid transaction id");
+
+  await updateDoc(docRef, {
+    recipientName,
+    shipmentProof,
+    status: "Selesai",
+  });
+
+  return `Transaksi dengan id: ${transactionId} diselesaikan`;
 };
