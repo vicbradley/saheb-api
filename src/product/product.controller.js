@@ -1,6 +1,5 @@
 import express from "express";
 import { getAllProduct, getProductById, getProductsByKeyword } from "./product.services.js";
-import { verifyToken } from "../middleware/auth.js";
 
 const productController = express.Router();
 

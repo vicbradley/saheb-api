@@ -9,8 +9,7 @@ export const checkStoreOwnership = async (req, res, next) => {
 
   const { owner } = docSnap.data();
 
-  if (owner !== req.userId) {
-    return res.status(401).send({ message: "User is not the owner!" });
-  }
+  if (owner !== req.userId) return res.status(401).send({ message: "User is not the owner!" });
+  
   next();
 };

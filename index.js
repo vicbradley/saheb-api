@@ -1,5 +1,8 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+import favicon from "serve-favicon";
 import productController from "./src/product/product.controller.js";
 import consultController from "./src/consult/consult.controller.js";
 import { storeController } from "./src/store/store.controller.js";
@@ -13,8 +16,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const publicDirectory = path.join(__dirname, "public");
+
+// Favicon middleware should be used before static middleware
+app.use(express.static(publicDirectory));
+
+app.use(favicon(path.join(publicDirectory, "favicon.ico")));
+
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.sendFile(path.join(publicDirectory, "index.html"));
 });
 
 app.use("/products", productController);
